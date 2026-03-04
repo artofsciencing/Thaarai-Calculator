@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>நட்சத்திர தாரை · Nakshatra Thaarai</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Jost:wght@200;300;400;500&family=Noto+Sans+Tamil:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04040e;--saffron:#e8943a;--amber:#f5c842;--cream:#f0ead6;
+  --muted:#7a788a;--card-bg:rgba(12,10,30,0.88);--border:rgba(232,148,58,0.2);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--cream);font-family:'Jost',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+#cosmos{position:fixed;inset:0;z-index:0;pointer-events:none;}
+body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.32;}
+.page{position:relative;z-index:2;max-width:1100px;margin:0 auto;padding:0 20px 80px;}
+
+/* Header */
+header{text-align:center;padding:54px 0 40px;}
+.header-rune{font-size:10px;letter-spacing:8px;color:var(--saffron);text-transform:uppercase;font-weight:400;margin-bottom:16px;opacity:.8;}
+h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,6vw,3.8rem);font-weight:600;color:var(--cream);line-height:1.1;}
+h1 em{font-style:italic;color:var(--saffron);}
+.tamil-h{font-family:'Noto Sans Tamil',sans-serif;font-size:clamp(.9rem,2.5vw,1.3rem);color:var(--amber);margin-top:8px;font-weight:300;letter-spacing:4px;opacity:.85;}
+.tagline{margin-top:12px;color:var(--muted);font-size:.82rem;letter-spacing:2px;text-transform:uppercase;}
+.orn{display:flex;align-items:center;gap:14px;max-width:320px;margin:22px auto 0;}
+.orn-line{flex:1;height:1px;background:linear-gradient(to right,transparent,var(--saffron),transparent);opacity:.4;}
+.orn-gem{width:7px;height:7px;background:var(--saffron);transform:rotate(45deg);box-shadow:0 0 10px var(--saffron);}
+
+/* Selector */
+.selector-section{margin-bottom:40px;text-align:center;}
+.selector-label{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--saffron);margin-bottom:14px;font-weight:400;}
+.selector-wrap{display:inline-flex;align-items:stretch;background:rgba(8,6,20,.93);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 0 60px rgba(232,148,58,.08),0 8px 32px rgba(0,0,0,.6);max-width:580px;width:100%;}
+.selector-icon{padding:0 16px;display:flex;align-items:center;font-size:18px;border-right:1px solid var(--border);color:var(--saffron);background:rgba(232,148,58,.06);}
+select#nakshatra{flex:1;background:transparent;border:none;color:var(--cream);font-family:'Jost',sans-serif;font-size:.98rem;font-weight:300;padding:14px 16px;appearance:none;cursor:pointer;outline:none;letter-spacing:.5px;}
+select#nakshatra option{background:#0c0a1e;color:var(--cream);}
+.sel-arrow{padding:0 14px;display:flex;align-items:center;pointer-events:none;color:var(--saffron);opacity:.6;font-size:11px;}
+.quick-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-top:12px;max-width:720px;margin-left:auto;margin-right:auto;}
+.chip{background:rgba(232,148,58,.06);border:1px solid rgba(232,148,58,.18);border-radius:18px;padding:4px 12px;font-size:.76rem;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'Noto Sans Tamil',sans-serif;}
+.chip:hover,.chip.active{background:rgba(232,148,58,.15);border-color:var(--saffron);color:var(--amber);}
+
+/* Janma display */
+#janma-display{display:none;text-align:center;margin-bottom:36px;animation:riseUp .6s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes riseUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.janma-card{display:inline-block;background:linear-gradient(135deg,rgba(232,148,58,.12),rgba(245,200,66,.05));border:1px solid rgba(232,148,58,.38);border-radius:14px;padding:20px 36px;box-shadow:0 0 50px rgba(232,148,58,.1);}
+.janma-label{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--saffron);margin-bottom:7px;opacity:.8;}
+.janma-name-en{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--amber);font-style:italic;}
+.janma-name-ta{font-family:'Noto Sans Tamil',sans-serif;font-size:.95rem;color:var(--cream);margin-top:4px;opacity:.85;}
+.janma-meta{margin-top:7px;font-size:.76rem;color:var(--muted);letter-spacing:1px;}
+
+/* ── REGION + MONTH CONTROLS ─── */
+#controls-bar{display:none;background:rgba(10,8,25,.9);border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:28px;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+.ctrl-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.ctrl-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--saffron);opacity:.8;}
+.ctrl-tz{display:flex;align-items:center;gap:8px;background:rgba(232,148,58,.07);border:1px solid rgba(232,148,58,.2);border-radius:8px;padding:7px 14px;cursor:pointer;transition:border-color .2s;}
+.ctrl-tz:hover{border-color:var(--saffron);}
+.ctrl-tz-icon{font-size:14px;color:var(--saffron);}
+.ctrl-tz-name{font-size:.82rem;color:var(--cream);}
+.tz-select{background:#0a0820;border:1px solid rgba(232,148,58,.3);border-radius:8px;color:var(--cream);font-family:'Jost',sans-serif;font-size:.82rem;padding:7px 12px;outline:none;cursor:pointer;}
+.tz-select option{background:#0c0a1e;}
+
+/* Month nav */
+.month-nav{display:flex;align-items:center;gap:10px;}
+.mnav-btn{background:rgba(232,148,58,.08);border:1px solid rgba(232,148,58,.25);border-radius:7px;color:var(--saffron);font-size:16px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;user-select:none;}
+.mnav-btn:hover{background:rgba(232,148,58,.18);border-color:var(--saffron);}
+.mnav-btn.disabled{opacity:.3;pointer-events:none;}
+.month-label{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--amber);font-style:italic;min-width:160px;text-align:center;}
+
+/* ── CALENDAR ─── */
+#cal-section{display:none;margin-bottom:32px;}
+.cal-header{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:16px;}
+.cal-grid{background:rgba(10,8,25,.85);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid rgba(255,255,255,.06);}
+.cal-wd{padding:10px 0;text-align:center;font-size:.68rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-cell{position:relative;padding:8px 4px 6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.04);border-right:1px solid rgba(255,255,255,.04);min-height:64px;cursor:default;transition:background .2s;}
+.cal-cell:nth-child(7n){border-right:none;}
+.cal-cell.empty{background:rgba(0,0,0,.1);}
+.cal-cell.today{outline:1px solid var(--saffron);outline-offset:-2px;}
+.cal-cell:hover:not(.empty){background:rgba(255,255,255,.04);}
+.cal-date{font-size:.8rem;font-weight:400;display:block;color:var(--cream);margin-bottom:4px;}
+.cal-nak-name{font-size:.58rem;color:var(--muted);display:block;letter-spacing:.5px;line-height:1.3;}
+.cal-nak-ta{font-family:'Noto Sans Tamil',sans-serif;font-size:.58rem;display:block;line-height:1.3;}
+.cal-thaarai-bar{position:absolute;bottom:0;left:0;right:0;height:3px;}
+.cal-cell.empty .cal-date{color:rgba(255,255,255,.1);}
+
+/* Tooltip */
+.cal-tooltip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#0d0b22;border:1px solid var(--border);border-radius:8px;padding:8px 12px;width:160px;z-index:20;pointer-events:none;opacity:0;transition:opacity .15s;white-space:normal;}
+.cal-cell:hover .cal-tooltip{opacity:1;}
+.tt-nak{font-size:.8rem;color:var(--amber);font-family:'Playfair Display',serif;font-style:italic;}
+.tt-nak-ta{font-family:'Noto Sans Tamil',sans-serif;font-size:.72rem;color:var(--cream);margin-top:2px;}
+.tt-thaarai{font-size:.7rem;color:var(--muted);margin-top:4px;}
+.tt-verdict{font-size:.65rem;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px;}
+
+/* Cal color legend */
+.cal-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px;}
+.cl-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted);}
+.cl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* Grid header */
+.grid-header{display:none;text-align:center;margin-bottom:20px;}
+.grid-header-text{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--muted);}
+
+/* ── 9 THAARAI CARDS ─── */
+#thaarai-grid{display:none;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:720px){#thaarai-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:460px){#thaarai-grid{grid-template-columns:1fr;}}
+.t-card{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;padding:18px;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;opacity:0;transform:translateY(20px);animation:cardIn .5s cubic-bezier(.22,1,.36,1) forwards;backdrop-filter:blur(10px);}
+.t-card:hover{transform:translateY(-3px);box-shadow:0 16px 44px rgba(0,0,0,.55);}
+.t-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--tc);box-shadow:0 0 10px var(--tc);}
+.t-card::after{content:'';position:absolute;top:-40px;left:-40px;width:110px;height:110px;background:var(--tc);opacity:.04;border-radius:50%;filter:blur(28px);pointer-events:none;}
+@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+.t-num-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--tc);color:var(--tc);font-family:'Playfair Display',serif;font-size:1rem;font-style:italic;margin-bottom:10px;}
+.t-name-en{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--cream);margin-bottom:2px;}
+.t-name-ta{font-family:'Noto Sans Tamil',sans-serif;font-size:.78rem;color:var(--tc);margin-bottom:8px;opacity:.9;}
+.verdict-pill{display:inline-block;padding:2px 10px;border-radius:18px;font-size:.64rem;letter-spacing:2px;text-transform:uppercase;font-weight:500;margin-bottom:10px;background:color-mix(in srgb,var(--tc) 13%,transparent);color:var(--tc);border:1px solid color-mix(in srgb,var(--tc) 26%,transparent);}
+.t-meaning{font-size:.77rem;color:var(--muted);line-height:1.6;margin-bottom:10px;font-style:italic;}
+.t-divider{height:1px;background:linear-gradient(to right,var(--tc),transparent);opacity:.18;margin-bottom:10px;}
+.t-stars-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.t-stars-list{display:flex;flex-direction:column;gap:4px;}
+.t-star-item{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:6px 9px;transition:background .2s;}
+.t-star-item:hover{background:rgba(255,255,255,.06);border-color:color-mix(in srgb,var(--tc) 28%,transparent);}
+.t-star-dot{width:5px;height:5px;border-radius:50%;background:var(--tc);box-shadow:0 0 5px var(--tc);flex-shrink:0;}
+.t-star-en{font-size:.78rem;color:var(--cream);flex:1;}
+.t-star-ta{font-family:'Noto Sans Tamil',sans-serif;font-size:.68rem;color:var(--tc);opacity:.75;}
+.t-star-num{font-size:.65rem;color:var(--muted);min-width:16px;text-align:right;}
+
+/* Dates section in card */
+.t-dates-section{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06);}
+.t-dates-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.t-dates-label span{flex:1;height:1px;background:linear-gradient(to right,rgba(255,255,255,.08),transparent);}
+.date-chips{display:flex;flex-wrap:wrap;gap:4px;}
+.date-chip{display:inline-flex;flex-direction:column;align-items:center;background:color-mix(in srgb,var(--tc) 10%,rgba(0,0,0,.3));border:1px solid color-mix(in srgb,var(--tc) 25%,transparent);border-radius:6px;padding:4px 7px;cursor:default;transition:background .2s;}
+.date-chip:hover{background:color-mix(in srgb,var(--tc) 18%,rgba(0,0,0,.3));}
+.dc-day{font-size:.82rem;color:var(--cream);font-weight:400;line-height:1;}
+.dc-nak{font-size:.58rem;color:var(--tc);opacity:.8;line-height:1.3;font-family:'Noto Sans Tamil',sans-serif;max-width:48px;text-align:center;}
+.no-dates{font-size:.75rem;color:var(--muted);font-style:italic;opacity:.7;}
+
+.t-card.janma-self{grid-column:1/-1;}
+@media(max-width:460px){.t-card.janma-self{grid-column:1;}}
+
+/* Legend */
+#legend{display:none;margin-top:40px;}
+.legend-title{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:16px;}
+.legend-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;}
+.legend-item{display:flex;align-items:center;gap:9px;padding:8px 12px;background:rgba(12,10,30,.6);border:1px solid rgba(255,255,255,.05);border-radius:9px;}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.l-name{font-size:.78rem;color:var(--cream);}
+.l-sub{font-family:'Noto Sans Tamil',sans-serif;font-size:.68rem;color:var(--muted);}
+
+/* Prompt */
+#prompt{text-align:center;padding:50px 0;color:var(--muted);font-size:.86rem;letter-spacing:1px;font-style:italic;}
+.prompt-icon{font-size:38px;margin-bottom:10px;opacity:.4;display:block;}
+
+footer{text-align:center;margin-top:56px;padding-top:22px;border-top:1px solid rgba(255,255,255,.06);color:var(--muted);font-size:.74rem;letter-spacing:1px;font-style:italic;}
+</style>
+</head>
+<body>
+<canvas id="cosmos"></canvas>
+<div class="page">
+
+  <header>
+    <div class="header-rune">Vedic Astrology · Jyotish · Tamil Tradition</div>
+    <h1>Nakshatra <em>Thaarai</em></h1>
+    <div class="tamil-h">நட்சத்திர தாரை கணிப்பு</div>
+    <p class="tagline">Personalised auspicious &amp; inauspicious star dates — by month &amp; region</p>
+    <div class="orn"><div class="orn-line"></div><div class="orn-gem"></div><div class="orn-line"></div></div>
+  </header>
+
+  <div class="selector-section">
+    <div class="selector-label">☽ &nbsp;Select Your Janma Nakshatra · ஜன்ம நட்சத்திரம்</div>
+    <div class="selector-wrap">
+      <div class="selector-icon">✦</div>
+      <select id="nakshatra"><option value="">— Choose your birth star —</option></select>
+      <div class="sel-arrow">▾</div>
+    </div>
+    <div class="quick-chips" id="chips"></div>
+  </div>
+
+  <div id="janma-display">
+    <div class="janma-card">
+      <div class="janma-label">✦ Your Janma Nakshatra ✦</div>
+      <div class="janma-name-en" id="jd-en"></div>
+      <div class="janma-name-ta" id="jd-ta"></div>
+      <div class="janma-meta" id="jd-meta"></div>
+    </div>
+  </div>
+
+  <!-- Region + Month Controls -->
+  <div id="controls-bar">
+    <div class="ctrl-group">
+      <span class="ctrl-label">🌍 Region</span>
+      <select class="tz-select" id="tz-select"></select>
+    </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">📅 Month</span>
+      <div class="month-nav">
+        <div class="mnav-btn" id="prev-month">&#8249;</div>
+        <div class="month-label" id="month-label"></div>
+        <div class="mnav-btn" id="next-month">&#8250;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Calendar -->
+  <div id="cal-section">
+    <div class="cal-header" id="cal-header-text"></div>
+    <div class="cal-grid">
+      <div class="cal-weekdays">
+        <div class="cal-wd">Sun</div><div class="cal-wd">Mon</div><div class="cal-wd">Tue</div>
+        <div class="cal-wd">Wed</div><div class="cal-wd">Thu</div><div class="cal-wd">Fri</div><div class="cal-wd">Sat</div>
+      </div>
+      <div class="cal-days" id="cal-days"></div>
+    </div>
+    <div class="cal-legend" id="cal-legend"></div>
+  </div>
+
+  <div class="grid-header" id="grid-header">
+    <div class="grid-header-text">9 Thaarai · Auspiciousness of all 27 Nakshatras from your birth star</div>
+  </div>
+  <div id="thaarai-grid"></div>
+  <div id="prompt"><span class="prompt-icon">🌌</span>Select your birth star above to reveal your personalised Thaarai chart</div>
+  <div id="legend"><div class="legend-title">Thaarai Reference · 9 Categories</div><div class="legend-grid" id="legend-grid"></div></div>
+</div>
+<footer>✦ &nbsp;Based on classical Tamil &amp; Vedic Jyotish · Lahiri Ayanamsa · Moon positions calculated at local noon &nbsp;✦ &nbsp;Consult a qualified astrologer for important decisions</footer>
+
+<script>
+/* ═══════════════ DATA ══════════════════════════════════════ */
+const NAKS=[
+  {n:'Ashwini',ta:'அசுவினி',lord:'Ketu',deity:'Ashvins'},
+  {n:'Bharani',ta:'பரணி',lord:'Venus',deity:'Yama'},
+  {n:'Krittika',ta:'கார்த்திகை',lord:'Sun',deity:'Agni'},
+  {n:'Rohini',ta:'ரோகிணி',lord:'Moon',deity:'Brahma'},
+  {n:'Mrigashira',ta:'மிருகசீரிஷம்',lord:'Mars',deity:'Soma'},
+  {n:'Ardra',ta:'திருவாதிரை',lord:'Rahu',deity:'Rudra'},
+  {n:'Punarvasu',ta:'புனர்பூசம்',lord:'Jupiter',deity:'Aditi'},
+  {n:'Pushya',ta:'பூசம்',lord:'Saturn',deity:'Brihaspati'},
+  {n:'Ashlesha',ta:'ஆயில்யம்',lord:'Mercury',deity:'Sarpa'},
+  {n:'Magha',ta:'மகம்',lord:'Ketu',deity:'Pitrs'},
+  {n:'Purva Phalguni',ta:'பூரம்',lord:'Venus',deity:'Bhaga'},
+  {n:'Uttara Phalguni',ta:'உத்திரம்',lord:'Sun',deity:'Aryaman'},
+  {n:'Hasta',ta:'அஸ்தம்',lord:'Moon',deity:'Savitar'},
+  {n:'Chitra',ta:'சித்திரை',lord:'Mars',deity:'Vishwakarma'},
+  {n:'Swati',ta:'சுவாதி',lord:'Rahu',deity:'Vayu'},
+  {n:'Vishakha',ta:'விசாகம்',lord:'Jupiter',deity:'Indragni'},
+  {n:'Anuradha',ta:'அனுஷம்',lord:'Saturn',deity:'Mitra'},
+  {n:'Jyeshtha',ta:'கேட்டை',lord:'Mercury',deity:'Indra'},
+  {n:'Mula',ta:'மூலம்',lord:'Ketu',deity:'Nirriti'},
+  {n:'Purva Ashadha',ta:'பூராடம்',lord:'Venus',deity:'Apas'},
+  {n:'Uttara Ashadha',ta:'உத்திராடம்',lord:'Sun',deity:'Vishwadevas'},
+  {n:'Shravana',ta:'திருவோணம்',lord:'Moon',deity:'Vishnu'},
+  {n:'Dhanishtha',ta:'அவிட்டம்',lord:'Mars',deity:'Eight Vasus'},
+  {n:'Shatabhisha',ta:'சதயம்',lord:'Rahu',deity:'Varuna'},
+  {n:'Purva Bhadrapada',ta:'பூரட்டாதி',lord:'Jupiter',deity:'Ajaikapada'},
+  {n:'Uttara Bhadrapada',ta:'உத்திரட்டாதி',lord:'Saturn',deity:'Ahirbudhnya'},
+  {n:'Revati',ta:'ரேவதி',lord:'Mercury',deity:'Pushan'},
+];
+
+const THAARAI=[
+  {num:1,name:'Janma',ta:'ஜன்மம்',color:'#a78bfa',verdict:'Neutral',label:'NEUTRAL',meaning:'The birth star cycle — neither clearly auspicious nor inauspicious. Proceed with mindfulness.'},
+  {num:2,name:'Sampat',ta:'சம்பத்',color:'#34d399',verdict:'Auspicious',label:'EXCELLENT',meaning:'Wealth & fortune — highly favourable for new ventures, investments, travel, and ceremonies.'},
+  {num:3,name:'Vipat',ta:'விபத்து',color:'#f87171',verdict:'Inauspicious',label:'AVOID',meaning:'Danger & obstacles — avoid surgeries, journeys, and important decisions on these star days.'},
+  {num:4,name:'Kshema',ta:'க்ஷேமம்',color:'#60a5fa',verdict:'Auspicious',label:'GOOD',meaning:'Wellbeing & comfort — auspicious for health matters, family gatherings, and peaceful activities.'},
+  {num:5,name:'Pratyari',ta:'பிரத்யாரி',color:'#fb923c',verdict:'Inauspicious',label:'AVOID',meaning:'Enemy & conflict — creates friction, losses, enmity. Avoid confrontations and contracts.'},
+  {num:6,name:'Sadhana',ta:'சாதன',color:'#38bdf8',verdict:'Auspicious',label:'GOOD',meaning:'Achievement & fulfilment — auspicious for education, skill-building, and career growth.'},
+  {num:7,name:'Naidhana',ta:'நைதனம்',color:'#ef4444',verdict:'Inauspicious',label:'MOST HARMFUL',meaning:'Death-like calamity — the most inauspicious Thaarai. Strongly avoid for all significant events.'},
+  {num:8,name:'Mitra',ta:'மித்திரம்',color:'#4ade80',verdict:'Auspicious',label:'GOOD',meaning:'Friendship & alliance — auspicious for partnerships, social events, and new relationships.'},
+  {num:9,name:'Parama Mitra',ta:'பரம மித்திரம்',color:'#fbbf24',verdict:'Auspicious',label:'MOST BLESSED',meaning:'Supreme friend star — the most auspicious Thaarai. Ideal for all sacred and joyous occasions.'},
+];
+
+const TIMEZONES=[
+  {label:'Auto-detect (Browser)',id:'auto'},
+  {label:'India — IST (UTC+5:30)',id:'Asia/Kolkata'},
+  {label:'Sri Lanka — SLST (UTC+5:30)',id:'Asia/Colombo'},
+  {label:'UK — GMT/BST',id:'Europe/London'},
+  {label:'USA — Eastern (ET)',id:'America/New_York'},
+  {label:'USA — Central (CT)',id:'America/Chicago'},
+  {label:'USA — Pacific (PT)',id:'America/Los_Angeles'},
+  {label:'Canada — Eastern',id:'America/Toronto'},
+  {label:'UAE — GST (UTC+4)',id:'Asia/Dubai'},
+  {label:'Singapore — SGT (UTC+8)',id:'Asia/Singapore'},
+  {label:'Malaysia — MYT (UTC+8)',id:'Asia/Kuala_Lumpur'},
+  {label:'Australia — AEST/AEDT',id:'Australia/Sydney'},
+  {label:'Germany — CET/CEST',id:'Europe/Berlin'},
+  {label:'France — CET/CEST',id:'Europe/Paris'},
+  {label:'South Africa — SAST (UTC+2)',id:'Africa/Johannesburg'},
+  {label:'New Zealand — NZST/NZDT',id:'Pacific/Auckland'},
+];
+
+const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+/* ═══════════════ COSMOS CANVAS ════════════════════════════ */
+(function(){
+  const cv=document.getElementById('cosmos'),cx=cv.getContext('2d');
+  let W,H,stars=[],shooters=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();addEventListener('resize',resize);
+  for(let i=0;i<300;i++) stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.7+.15,a:Math.random(),da:(Math.random()-.5)*.003,warm:Math.random()<.12});
+  const cPts=[[.1,.15],[.17,.11],[.23,.18],[.14,.22],[.78,.1],[.85,.07],[.9,.13],[.83,.17],[.55,.8],[.62,.75],[.67,.82]];
+  function nebula(){[{x:.1,y:.2,r:240,c:'rgba(50,20,110,.07)'},{x:.88,y:.65,r:290,c:'rgba(20,50,110,.06)'},{x:.5,y:.45,r:190,c:'rgba(110,45,15,.04)'}].forEach(b=>{const g=cx.createRadialGradient(b.x*W,b.y*H,0,b.x*W,b.y*H,b.r);g.addColorStop(0,b.c);g.addColorStop(1,'transparent');cx.fillStyle=g;cx.beginPath();cx.arc(b.x*W,b.y*H,b.r,0,Math.PI*2);cx.fill();});}
+  function spawnShoot(){if(Math.random()<.003&&shooters.length<2)shooters.push({x:Math.random()*W*.6,y:Math.random()*H*.35,len:90+Math.random()*100,spd:7+Math.random()*5,a:1,ang:Math.PI/6+Math.random()*.25});}
+  let t=0;
+  (function loop(){
+    cx.clearRect(0,0,W,H);nebula();
+    cx.strokeStyle='rgba(245,200,66,.07)';cx.lineWidth=.8;
+    for(let i=0;i<cPts.length-1;i+=4){cx.beginPath();cx.moveTo(cPts[i][0]*W,cPts[i][1]*H);if(cPts[i+1])cx.lineTo(cPts[i+1][0]*W,cPts[i+1][1]*H);if(cPts[i+2])cx.lineTo(cPts[i+2][0]*W,cPts[i+2][1]*H);cx.stroke();}
+    stars.forEach(s=>{s.a+=s.da;if(s.a>1||s.a<.05)s.da*=-1;cx.globalAlpha=s.a;cx.fillStyle=s.warm?'hsl(35,80%,80%)':'#fff';cx.beginPath();cx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);cx.fill();});
+    cx.globalAlpha=1;
+    cPts.forEach(p=>{const pulse=1+Math.sin(t*.018+p[0]*10)*.35;const g=cx.createRadialGradient(p[0]*W,p[1]*H,0,p[0]*W,p[1]*H,5*pulse);g.addColorStop(0,'rgba(245,200,66,.9)');g.addColorStop(1,'rgba(245,200,66,0)');cx.fillStyle=g;cx.beginPath();cx.arc(p[0]*W,p[1]*H,5*pulse,0,Math.PI*2);cx.fill();});
+    spawnShoot();
+    shooters=shooters.filter(s=>{const dx=Math.cos(s.ang)*s.len,dy=Math.sin(s.ang)*s.len;const g=cx.createLinearGradient(s.x,s.y,s.x-dx,s.y-dy);g.addColorStop(0,`rgba(245,200,66,${s.a})`);g.addColorStop(1,'rgba(245,200,66,0)');cx.beginPath();cx.moveTo(s.x,s.y);cx.lineTo(s.x-dx,s.y-dy);cx.strokeStyle=g;cx.lineWidth=1.5;cx.stroke();s.x+=Math.cos(s.ang)*s.spd;s.y+=Math.sin(s.ang)*s.spd;s.a-=.016;return s.a>0;});
+    t++;requestAnimationFrame(loop);
+  })();
+})();
+
+/* ═══════════════ ASTRONOMY ════════════════════════════════ */
+function jd(y,m,d,h){
+  if(m<=2){y--;m+=12;}
+  const A=Math.floor(y/100),B=2-A+Math.floor(A/4);
+  return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+h/24+B-1524.5;
+}
+
+function moonLonTropical(JD){
+  const T=(JD-2451545)/36525,T2=T*T,T3=T2*T,T4=T3*T;
+  const r=x=>x*Math.PI/180;
+  let L0=218.3164477+481267.88123421*T-.0015786*T2+T3/538841-T4/65194000;
+  let M=134.9633964+477198.8675055*T+.0087414*T2+T3/69699-T4/14712000;
+  let Ms=357.5291092+35999.0502909*T-.0001536*T2+T3/24490000;
+  let F=93.2720950+483202.0175233*T-.0036539*T2-T3/3526000+T4/863310000;
+  let D=297.8501921+445267.1114034*T-.0018819*T2+T3/545868-T4/113065000;
+  const Mr=r(M),Msr=r(Ms),Fr=r(F),Dr=r(D);
+  let dL=6288774*Math.sin(Mr)+1274027*Math.sin(2*Dr-Mr)+658314*Math.sin(2*Dr)
+    +213618*Math.sin(2*Mr)-185116*Math.sin(Msr)-114332*Math.sin(2*Fr)
+    +58793*Math.sin(2*Dr-2*Mr)+57066*Math.sin(2*Dr-Msr-Mr)
+    +53322*Math.sin(2*Dr+Mr)+45758*Math.sin(2*Dr-Msr)
+    -40923*Math.sin(Msr-Mr)-34720*Math.sin(Dr)-30383*Math.sin(Msr+Mr)
+    +15327*Math.sin(2*Dr-2*Fr)+10980*Math.sin(Mr-2*Fr)+10675*Math.sin(4*Dr-Mr)
+    +10034*Math.sin(3*Mr)+8548*Math.sin(4*Dr-2*Mr)-7888*Math.sin(2*Dr+Msr-Mr)
+    -6766*Math.sin(2*Dr+Msr)-5163*Math.sin(Dr-Mr)+4987*Math.sin(Dr+Msr)
+    +4036*Math.sin(2*Dr-Msr+Mr)+3994*Math.sin(2*Dr+2*Mr)+3861*Math.sin(4*Dr)
+    +3665*Math.sin(2*Dr-3*Mr)-2689*Math.sin(Msr-2*Mr)-2602*Math.sin(2*Dr-Mr+2*Fr)
+    +2390*Math.sin(2*Dr-Msr-2*Mr)-2348*Math.sin(Dr+Mr)+2236*Math.sin(2*Dr-2*Msr)
+    -2120*Math.sin(Msr+2*Mr)-2069*Math.sin(2*Msr)+2048*Math.sin(2*Dr-2*Msr-Mr)
+    -1773*Math.sin(2*Dr+Mr-2*Fr)-1595*Math.sin(2*Dr+2*Fr)
+    +1215*Math.sin(4*Dr-Msr-Mr)-1110*Math.sin(2*Mr+2*Fr)
+    -892*Math.sin(3*Dr-Mr)-810*Math.sin(2*Dr+Msr+Mr);
+  dL/=1000000;
+  return(((L0+dL)%360)+360)%360;
+}
+
+function ayanamsa(JD){
+  // Lahiri ayanamsa
+  const T=(JD-2451545)/36525;
+  return 23.85+1.3972*T;
+}
+
+function getTZOffsetHours(y,m,d,tz){
+  try{
+    const ref=new Date(Date.UTC(y,m-1,d,12,0,0));
+    const fmt=new Intl.DateTimeFormat('en-US',{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false});
+    const parts=fmt.formatToParts(ref);
+    let h=parseInt(parts.find(p=>p.type==='hour').value);
+    const min=parseInt(parts.find(p=>p.type==='minute').value);
+    if(h===24)h=0;
+    let off=(h-12)+min/60;
+    if(off>13)off-=24;
+    if(off<-13)off+=24;
+    return off;
+  }catch(e){return 0;}
+}
+
+function getNakForDate(y,m,d,tzId){
+  const tz=(tzId==='auto')?Intl.DateTimeFormat().resolvedOptions().timeZone:tzId;
+  const utcOff=getTZOffsetHours(y,m,d,tz);
+  const utcH=12-utcOff; // local noon → UTC
+  const JD=jd(y,m,d,utcH);
+  const tropical=moonLonTropical(JD);
+  const ayan=ayanamsa(JD);
+  let sid=tropical-ayan;
+  sid=((sid%360)+360)%360;
+  return Math.floor(sid/(360/27));// 0-26
+}
+
+function getThaaraiNum(janmaIdx,nakIdx){
+  const count=((nakIdx-janmaIdx+27)%27)+1;
+  const rem=count%9;
+  return rem===0?9:rem; // 1-9
+}
+
+/* ═══════════════ STATE ════════════════════════════════════ */
+let selectedJanma=null;
+let currentYear=2026;
+let currentMonth=3; // March 2026 start
+const START_YEAR=2026,START_MONTH=3;
+const END_YEAR=2028,END_MONTH=3;
+let selectedTZ='auto';
+let monthCache={};
+
+/* ═══════════════ INIT UI ════════════════════════════════== */
+function buildSelect(){
+  const sel=document.getElementById('nakshatra');
+  NAKS.forEach((n,i)=>{const o=document.createElement('option');o.value=i;o.textContent=`${String(i+1).padStart(2,'0')}. ${n.n}  ·  ${n.ta}`;sel.appendChild(o);});
+}
+function buildChips(){
+  const wrap=document.getElementById('chips');
+  NAKS.forEach((n,i)=>{const c=document.createElement('span');c.className='chip';c.textContent=n.ta;c.title=n.n;c.onclick=()=>{document.getElementById('nakshatra').value=i;document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));c.classList.add('active');onSelect(i);};wrap.appendChild(c);});
+}
+function buildLegend(){
+  const g=document.getElementById('legend-grid');
+  THAARAI.forEach(t=>{g.innerHTML+=`<div class="legend-item"><div class="legend-dot" style="background:${t.color};box-shadow:0 0 6px ${t.color}40"></div><div><div class="l-name">${t.num}. ${t.name} — <span style="color:${t.color};font-size:.64rem;letter-spacing:1px">${t.label}</span></div><div class="l-sub">${t.ta}</div></div></div>`;});
+}
+function buildTZSelect(){
+  const sel=document.getElementById('tz-select');
+  TIMEZONES.forEach(tz=>{const o=document.createElement('option');o.value=tz.id;o.textContent=tz.label;sel.appendChild(o);});
+  // Try to match browser TZ
+  const btz=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const match=TIMEZONES.find(t=>t.id===btz);
+  sel.value=match?btz:'auto';
+  selectedTZ=sel.value;
+  sel.onchange=()=>{selectedTZ=sel.value;monthCache={};if(selectedJanma!==null)renderAll();};
+}
+function buildCalLegend(){
+  const el=document.getElementById('cal-legend');
+  el.innerHTML='';
+  THAARAI.forEach(t=>{el.innerHTML+=`<div class="cl-item"><div class="cl-dot" style="background:${t.color}"></div>${t.num}. ${t.name}</div>`;});
+}
+
+/* ═══════════════ MONTH NAVIGATION ═══════════════════════ */
+function setMonthLabel(){
+  document.getElementById('month-label').textContent=`${MONTH_NAMES[currentMonth-1]} ${currentYear}`;
+  document.getElementById('prev-month').classList.toggle('disabled',currentYear===START_YEAR&&currentMonth===START_MONTH);
+  document.getElementById('next-month').classList.toggle('disabled',currentYear===END_YEAR&&currentMonth===END_MONTH);
+}
+document.getElementById('prev-month').onclick=()=>{
+  if(currentYear===START_YEAR&&currentMonth===START_MONTH)return;
+  currentMonth--;if(currentMonth<1){currentMonth=12;currentYear--;}
+  setMonthLabel();renderAll();
+};
+document.getElementById('next-month').onclick=()=>{
+  if(currentYear===END_YEAR&&currentMonth===END_MONTH)return;
+  currentMonth++;if(currentMonth>12){currentMonth=1;currentYear++;}
+  setMonthLabel();renderAll();
+};
+
+/* ═══════════════ MONTH DATA CACHE ══════════════════════ */
+function getMonthData(year,month){
+  const key=`${year}-${month}-${selectedTZ}-${selectedJanma}`;
+  if(monthCache[key])return monthCache[key];
+  const days=new Date(year,month,0).getDate();
+  const data=[];
+  for(let d=1;d<=days;d++){
+    const nakIdx=getNakForDate(year,month,d,selectedTZ);
+    const thaaraiNum=selectedJanma!==null?getThaaraiNum(selectedJanma,nakIdx):null;
+    data.push({day:d,nakIdx,thaaraiNum});
+  }
+  monthCache[key]=data;
+  return data;
+}
+
+/* ═══════════════ RENDER CALENDAR ═══════════════════════ */
+function renderCalendar(data,year,month){
+  document.getElementById('cal-header-text').textContent=`${MONTH_NAMES[month-1]} ${year} · Moon Nakshatra Calendar for your Region`;
+  buildCalLegend();
+  const firstDay=new Date(year,month-1,1).getDay();// 0=Sun
+  const today=new Date();
+  const isCurrentMonth=today.getFullYear()===year&&(today.getMonth()+1)===month;
+  const todayDate=today.getDate();
+  let html='';
+  for(let e=0;e<firstDay;e++) html+=`<div class="cal-cell empty"></div>`;
+  data.forEach(({day,nakIdx,thaaraiNum})=>{
+    const nak=NAKS[nakIdx];
+    const th=thaaraiNum!==null?THAARAI[thaaraiNum-1]:null;
+    const color=th?th.color:'#666';
+    const isToday=isCurrentMonth&&day===todayDate;
+    html+=`<div class="cal-cell${isToday?' today':''}">
+      <span class="cal-date">${day}</span>
+      <span class="cal-nak-name">${nak.n}</span>
+      <span class="cal-nak-ta" style="color:${color}80">${nak.ta}</span>
+      <div class="cal-thaarai-bar" style="background:${color};box-shadow:0 0 6px ${color}60"></div>
+      <div class="cal-tooltip">
+        <div class="tt-nak">${nak.n}</div>
+        <div class="tt-nak-ta">${nak.ta}</div>
+        ${th?`<div class="tt-thaarai">${th.num}. ${th.name} · ${th.ta}</div><div class="tt-verdict" style="color:${color}">${th.label}</div>`:''}
+      </div>
+    </div>`;
+  });
+  document.getElementById('cal-days').innerHTML=html;
+}
+
+/* ═══════════════ RENDER THAARAI CARDS ══════════════════ */
+function renderCards(data,year,month){
+  const grid=document.getElementById('thaarai-grid');
+  grid.innerHTML='';
+  grid.style.display='grid';
+
+  // Build lookup: thaaraiNum → days
+  const thaaraiDays={};
+  for(let t=1;t<=9;t++) thaaraiDays[t]=[];
+  data.forEach(({day,nakIdx,thaaraiNum})=>{
+    if(thaaraiNum!==null) thaaraiDays[thaaraiNum].push({day,nakIdx});
+  });
+
+  THAARAI.forEach((th,ti)=>{
+    const isJanma=(ti===0);
+    const delay=ti*0.06;
+    const positions=[0,9,18].map(off=>(selectedJanma+ti+off)%27);
+    const naks=positions.map(p=>({...NAKS[p],pos:p+1}));
+
+    // Date chips for this month
+    const days=thaaraiDays[th.num]||[];
+    let datesHTML='';
+    if(days.length===0){
+      datesHTML=`<span class="no-dates">No occurrences this month</span>`;
+    } else {
+      datesHTML=days.map(({day,nakIdx})=>{
+        const nak=NAKS[nakIdx];
+        return `<div class="date-chip" title="${nak.n} · ${nak.ta}"><span class="dc-day">${day}</span><span class="dc-nak">${nak.ta}</span></div>`;
+      }).join('');
+    }
+
+    const starsHTML=naks.map(n=>`<div class="t-star-item"><div class="t-star-dot"></div><div class="t-star-en">${n.n}</div><div class="t-star-ta">${n.ta}</div><div class="t-star-num">#${n.pos}</div></div>`).join('');
+
+    const card=document.createElement('div');
+    card.className='t-card'+(isJanma?' janma-self':'');
+    card.style.cssText=`--tc:${th.color};animation-delay:${delay}s`;
+    card.innerHTML=`
+      <div class="t-num-badge">${th.num}</div>
+      <div class="t-name-en">${th.name}</div>
+      <div class="t-name-ta">${th.ta}</div>
+      <div class="verdict-pill">${th.label}</div>
+      <div class="t-meaning">${th.meaning}</div>
+      <div class="t-divider"></div>
+      <div class="t-stars-label">Nakshatras in this Thaarai</div>
+      <div class="t-stars-list">${starsHTML}</div>
+      <div class="t-dates-section">
+        <div class="t-dates-label">📅 Dates in ${MONTH_NAMES[month-1]} ${year} <span></span></div>
+        <div class="date-chips">${datesHTML}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════ RENDER ALL ══════════════════════════════ */
+function renderAll(){
+  if(selectedJanma===null)return;
+  const data=getMonthData(currentYear,currentMonth);
+  renderCalendar(data,currentYear,currentMonth);
+  renderCards(data,currentYear,currentMonth);
+}
+
+/* ═══════════════ SELECT HANDLER ════════════════════════= */
+function onSelect(idx){
+  if(idx===''||idx===null)return;
+  idx=parseInt(idx);
+  selectedJanma=idx;
+  monthCache={};
+  const nak=NAKS[idx];
+  document.querySelectorAll('.chip').forEach((c,i)=>c.classList.toggle('active',i===idx));
+  document.getElementById('jd-en').textContent=nak.n;
+  document.getElementById('jd-ta').textContent=nak.ta;
+  document.getElementById('jd-meta').textContent=`Star #${idx+1}  ·  Planetary Lord: ${nak.lord}  ·  Deity: ${nak.deity}`;
+  const jdEl=document.getElementById('janma-display');
+  jdEl.style.display='none';void jdEl.offsetWidth;jdEl.style.display='block';
+  document.getElementById('controls-bar').style.display='flex';
+  document.getElementById('cal-section').style.display='block';
+  document.getElementById('prompt').style.display='none';
+  document.getElementById('grid-header').style.display='block';
+  document.getElementById('legend').style.display='block';
+  setMonthLabel();
+  renderAll();
+  setTimeout(()=>document.getElementById('controls-bar').scrollIntoView({behavior:'smooth',block:'start'}),80);
+}
+
+/* ═══════════════ BOOT ═══════════════════════════════════ */
+buildSelect();buildChips();buildLegend();buildTZSelect();
+document.getElementById('nakshatra').addEventListener('change',function(){onSelect(this.value);});
+</script>
+</body>
+</html>
