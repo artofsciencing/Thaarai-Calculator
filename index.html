@@ -352,7 +352,6 @@ function moonLonTropical(JD){
 }
 
 function ayanamsa(JD){
-  // Lahiri ayanamsa
   const T=(JD-2451545)/36525;
   return 23.85+1.3972*T;
 }
@@ -375,29 +374,36 @@ function getTZOffsetHours(y,m,d,tz){
 function getNakForDate(y,m,d,tzId){
   const tz=(tzId==='auto')?Intl.DateTimeFormat().resolvedOptions().timeZone:tzId;
   const utcOff=getTZOffsetHours(y,m,d,tz);
-  const utcH=12-utcOff; // local noon → UTC
+  const utcH=12-utcOff;
   const JD=jd(y,m,d,utcH);
   const tropical=moonLonTropical(JD);
   const ayan=ayanamsa(JD);
   let sid=tropical-ayan;
   sid=((sid%360)+360)%360;
-  return Math.floor(sid/(360/27));// 0-26
+  return Math.floor(sid/(360/27));
 }
 
 function getThaaraiNum(janmaIdx,nakIdx){
   const count=((nakIdx-janmaIdx+27)%27)+1;
   const rem=count%9;
-  return rem===0?9:rem; // 1-9
+  return rem===0?9:rem;
 }
 
 /* ═══════════════ STATE ════════════════════════════════════ */
-let selectedJanma=null;
-let currentYear=2026;
-let currentMonth= TODAY.GETMONTH(); 
-const START_YEAR=TODAY.GETFULLYEAR();
-const END_YEAR=2028,END_MONTH=3;
-let selectedTZ='auto';
-let monthCache={};
+// FIX: Use today's actual date for initialisation
+const _today = new Date();
+const START_YEAR  = _today.getFullYear();
+const START_MONTH = _today.getMonth() + 1; // getMonth() is 0-indexed, so +1
+
+let selectedJanma = null;
+let currentYear   = START_YEAR;
+let currentMonth  = START_MONTH;
+
+const END_YEAR = START_YEAR + 2;  // allow navigation 2 years forward
+const END_MONTH = START_MONTH;    // same month, 2 years ahead
+
+let selectedTZ = 'auto';
+let monthCache = {};
 
 /* ═══════════════ INIT UI ════════════════════════════════== */
 function buildSelect(){
@@ -415,7 +421,6 @@ function buildLegend(){
 function buildTZSelect(){
   const sel=document.getElementById('tz-select');
   TIMEZONES.forEach(tz=>{const o=document.createElement('option');o.value=tz.id;o.textContent=tz.label;sel.appendChild(o);});
-  // Try to match browser TZ
   const btz=Intl.DateTimeFormat().resolvedOptions().timeZone;
   const match=TIMEZONES.find(t=>t.id===btz);
   sel.value=match?btz:'auto';
@@ -431,17 +436,23 @@ function buildCalLegend(){
 /* ═══════════════ MONTH NAVIGATION ═══════════════════════ */
 function setMonthLabel(){
   document.getElementById('month-label').textContent=`${MONTH_NAMES[currentMonth-1]} ${currentYear}`;
-  document.getElementById('prev-month').classList.toggle('disabled',currentYear===START_YEAR&&currentMonth===START_MONTH);
-  document.getElementById('next-month').classList.toggle('disabled',currentYear===END_YEAR&&currentMonth===END_MONTH);
+  // Disable prev if at start month
+  const atStart=(currentYear===START_YEAR && currentMonth===START_MONTH);
+  // Disable next if at end month
+  const atEnd=(currentYear===END_YEAR && currentMonth===END_MONTH);
+  document.getElementById('prev-month').classList.toggle('disabled', atStart);
+  document.getElementById('next-month').classList.toggle('disabled', atEnd);
 }
 document.getElementById('prev-month').onclick=()=>{
-  if(currentYear===START_YEAR&&currentMonth===START_MONTH)return;
-  currentMonth--;if(currentMonth<1){currentMonth=12;currentYear--;}
+  if(currentYear===START_YEAR && currentMonth===START_MONTH) return;
+  currentMonth--;
+  if(currentMonth<1){currentMonth=12;currentYear--;}
   setMonthLabel();renderAll();
 };
 document.getElementById('next-month').onclick=()=>{
-  if(currentYear===END_YEAR&&currentMonth===END_MONTH)return;
-  currentMonth++;if(currentMonth>12){currentMonth=1;currentYear++;}
+  if(currentYear===END_YEAR && currentMonth===END_MONTH) return;
+  currentMonth++;
+  if(currentMonth>12){currentMonth=1;currentYear++;}
   setMonthLabel();renderAll();
 };
 
@@ -464,7 +475,7 @@ function getMonthData(year,month){
 function renderCalendar(data,year,month){
   document.getElementById('cal-header-text').textContent=`${MONTH_NAMES[month-1]} ${year} · Moon Nakshatra Calendar for your Region`;
   buildCalLegend();
-  const firstDay=new Date(year,month-1,1).getDay();// 0=Sun
+  const firstDay=new Date(year,month-1,1).getDay();
   const today=new Date();
   const isCurrentMonth=today.getFullYear()===year&&(today.getMonth()+1)===month;
   const todayDate=today.getDate();
@@ -496,7 +507,6 @@ function renderCards(data,year,month){
   grid.innerHTML='';
   grid.style.display='grid';
 
-  // Build lookup: thaaraiNum → days
   const thaaraiDays={};
   for(let t=1;t<=9;t++) thaaraiDays[t]=[];
   data.forEach(({day,nakIdx,thaaraiNum})=>{
@@ -509,7 +519,6 @@ function renderCards(data,year,month){
     const positions=[0,9,18].map(off=>(selectedJanma+ti+off)%27);
     const naks=positions.map(p=>({...NAKS[p],pos:p+1}));
 
-    // Date chips for this month
     const days=thaaraiDays[th.num]||[];
     let datesHTML='';
     if(days.length===0){
