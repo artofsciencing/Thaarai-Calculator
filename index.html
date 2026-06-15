@@ -393,8 +393,8 @@ function getThaaraiNum(janmaIdx,nakIdx){
 /* ═══════════════ STATE ════════════════════════════════════ */
 let selectedJanma=null;
 let currentYear=2026;
-let currentMonth=3; // March 2026 start
-const START_YEAR=2026,START_MONTH=3;
+let currentMonth= TODAY.GETMONTH(); 
+const START_YEAR=TODAY.GETFULLYEAR();
 const END_YEAR=2028,END_MONTH=3;
 let selectedTZ='auto';
 let monthCache={};
